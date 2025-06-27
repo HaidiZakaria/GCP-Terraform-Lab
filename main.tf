@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 # main.tf
+=======
+>>>>>>> d93acc4 (Rebuild GCP Terraform lab)
 provider "google" {
   project = var.project_id
   region  = var.region
@@ -20,4 +23,8 @@ resource "google_compute_instance" "vm_instance" {
     network       = "default"
     access_config {}
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> d93acc4 (Rebuild GCP Terraform lab)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 GCP Terraform Lab: Public Web Server + Cloud Storage
 
 This project demonstrates how to deploy a public-facing Apache web server on Google Cloud Platform (GCP) using Terraform. It provisions a secure virtual network, sets up a compute instance, configures firewall rules, and deploys a static web page — all fully automated as Infrastructure as Code (IaC).
@@ -91,3 +92,8 @@ Hello from GCP VM
 **Haidi Zakaria**  
 Cloud Engineering Enthusiast | Certified AWS ,Azure & IBM cloud
 [LinkedIn Profile](www.linkedin.com/in/haidi-zakaria-bb424152)
+=======
+# GCP Terraform Lab
+
+This project provisions a Google Cloud Compute Engine instance using Terraform.
+>>>>>>> d93acc4 (Rebuild GCP Terraform lab)

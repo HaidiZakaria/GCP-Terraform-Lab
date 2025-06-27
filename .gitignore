@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 .terraform/ 
+=======
+.terraform/
+*.tfstate
+*.tfstate.backup
+>>>>>>> d93acc4 (Rebuild GCP Terraform lab)
