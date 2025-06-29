@@ -1,71 +1,55 @@
 pipeline {
-<<<<<<< HEAD
-    agent any
+        agent any
+
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // ID from Jenkins Credentials
+        TF_IN_AUTOMATION = "true"
+    }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/HaidiZakaria/gcp-terraform-lab.git'
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform --version || true'
-                sh 'terraform init'
+                bat 'terraform init'
+            }
+        }
+
+        stage('Terraform Format') {
+            steps {
+                bat 'terraform fmt -check'
             }
         }
 
         stage('Terraform Validate') {
             steps {
-                sh 'terraform validate'
+                bat 'terraform validate'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh 'terraform plan'
+                bat 'terraform plan'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                bat 'terraform apply -auto-approve'
             }
         }
     }
-=======
-  agent any
 
-  environment {
-    GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-sa-key')
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        git 'https://github.com/HaidiZakaria/GCP-Terraform-Lab.git'
-      }
+    post {
+        success {
+            echo '✅ Terraform pipeline completed successfully!'
+        }
+        failure {
+            echo '❌ Build failed. Please check the logs above.'
+        }
     }
-
-    stage('Terraform Init') {
-      steps {
-        bat 'terraform init'
-      }
-    }
-
-    stage('Terraform Plan') {
-      steps {
-        bat 'terraform plan'
-      }
-    }
-
-    stage('Terraform Apply') {
-      steps {
-        input "Apply infrastructure changes?"
-        bat 'terraform apply -auto-approve'
-      }
-    }
-  }
->>>>>>> ec67583 (Add Jenkinsfile for Terraform CI/CD on Windows)
 }
