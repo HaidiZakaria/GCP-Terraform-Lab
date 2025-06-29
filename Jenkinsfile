@@ -1,8 +1,8 @@
 pipeline {
-        agent any
+    agent any
 
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // ID from Jenkins Credentials
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account') // Your Jenkins GCP JSON credentials ID
         TF_IN_AUTOMATION = "true"
     }
 
@@ -15,7 +15,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                bat 'terraform init'
+                bat 'terraform init -input=false -force-copy'
             }
         }
 
@@ -33,21 +33,20 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                bat 'terraform plan'
+                bat 'terraform plan -input=false'
             }
         }
 
-
         stage('Terraform Refresh') {
-    steps {
-        sh 'terraform refresh'
-    }
-}
-
+            steps {
+                bat 'terraform refresh -input=false'
+            }
+        }
 
         stage('Terraform Apply') {
             steps {
-                bat 'terraform apply -auto-approve'
+                input message: "Apply infrastructure changes?"
+                bat 'terraform apply -auto-approve -input=false'
             }
         }
     }
