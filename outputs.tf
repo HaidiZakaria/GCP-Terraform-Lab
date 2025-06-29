@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-# outputs.tf
-=======
->>>>>>> d93acc4 (Rebuild GCP Terraform lab)
 output "instance_name" {
-  value = google_compute_instance.vm_instance.name
+  description = "Name of the VM instance"
+  value       = google_compute_instance.vm_instance.name
 }
 
 output "instance_ip" {
-  value = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
-<<<<<<< HEAD
+  description = "External IP of the VM instance"
+  value       = google_compute_instance.vm_instance.network_interface[0].access_config[0].nat_ip
 }
-=======
-}
->>>>>>> d93acc4 (Rebuild GCP Terraform lab)

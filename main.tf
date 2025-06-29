@@ -4,16 +4,26 @@ provider "google" {
   zone    = var.zone
 }
 
-# VPC Network
-resource "google_compute_network" "vpc_network" {
+resource "google_compute_network" "vpc" {
   name                    = "terraform-vpc"
-  auto_create_subnetworks = true
+  auto_create_subnetworks = false
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
-# Firewall Rule to Allow HTTP (port 80)
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "terraform-subnet"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = var.region
+  network       = google_compute_network.vpc.id
+}
+
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
-  network = google_compute_network.vpc_network.name
+  network = google_compute_network.vpc.name
 
   allow {
     protocol = "tcp"
@@ -24,13 +34,25 @@ resource "google_compute_firewall" "allow_http" {
   target_tags   = ["http-server"]
 }
 
-# VM Instance with Apache Startup Script
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["35.235.240.0/20"]
+  target_tags   = ["ssh-access"]
+}
+
 resource "google_compute_instance" "vm_instance" {
   name         = "terraform-instance"
   machine_type = "e2-micro"
   zone         = var.zone
 
-  tags = ["http-server"]
+  tags = ["http-server", "ssh-access"]
 
   boot_disk {
     initialize_params {
@@ -39,19 +61,19 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
+    network    = google_compute_network.vpc.id
+    subnetwork = google_compute_subnetwork.subnet.id
 
     access_config {
-      # Creates external IP
+      // Ephemeral public IP
     }
   }
 
   metadata_startup_script = <<-EOT
     #!/bin/bash
-    apt-get update
-    apt-get install -y apache2
+    apt update
+    apt install -y apache2
     systemctl start apache2
     systemctl enable apache2
   EOT
 }
-

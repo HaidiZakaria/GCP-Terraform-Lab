@@ -37,6 +37,14 @@ pipeline {
             }
         }
 
+
+        stage('Terraform Refresh') {
+    steps {
+        sh 'terraform refresh'
+    }
+}
+
+
         stage('Terraform Apply') {
             steps {
                 bat 'terraform apply -auto-approve'
