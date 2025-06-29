@@ -1,99 +1,144 @@
-<<<<<<< HEAD
-# 🚀 GCP Terraform Lab: Public Web Server + Cloud Storage
+# GCP Terraform Project with Jenkins CI/CD Integration
 
-This project demonstrates how to deploy a public-facing Apache web server on Google Cloud Platform (GCP) using Terraform. It provisions a secure virtual network, sets up a compute instance, configures firewall rules, and deploys a static web page — all fully automated as Infrastructure as Code (IaC).
-
----
-
-## 🧰 Tools & Technologies
-
-- **Google Cloud Platform**
-- **Terraform**
-- **Compute Engine**
-- **Cloud Storage**
-- **Ubuntu 22.04 LTS**
-- **Apache Web Server**
-
----
-
-## 🏗️ Infrastructure Overview
-
-### 🔹 VPC Network
-- Auto-mode VPC (`multi-cloud-vpc`)
-- Ingress firewall allows **SSH (22)** and **HTTP (80)**
-
-### 🔹 VM Instance
-- Ubuntu 22.04 LTS
-- Apache2 installed on boot via startup script
-- Public IP accessible at: [`http://34.76.12.212`](http://34.76.12.212)
-
-### 🔹 Cloud Storage
-- Storage bucket created and named:  
-  `mc-bucket-[PROJECT_ID]`
-
----
-
-## ⚙️ Terraform Files
-
-| File        | Description                                 |
-|-------------|---------------------------------------------|
-| `main.tf`   | Declares all infrastructure resources        |
-| `variables.tf` | Holds reusable variable definitions       |
-| `outputs.tf`   | Displays public VM IP after deployment    |
-
----
-
-## ⚖️ How to Use
-
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/yourusername/gcp-terraform-lab.git
-   cd gcp-terraform-lab
-   ```
-
-2. Initialize Terraform:
-   ```bash
-   terraform init
-   ```
-
-3. Set your project and region in `terraform.tfvars` or via CLI.
-
-4. Apply the configuration:
-   ```bash
-   terraform apply
-   ```
-
-5. Access the public web server:
-   ```
-   http://<terraform output vm_ip>
-   ```
-
----
-
-## 📈 Output
-
+## Project Structure
 ```
-Hello from GCP VM
+gcp-terraform-lab/
+├── main.tf
+├── variables.tf
+├── outputs.tf
+├── backend.tf
+├── terraform.tfvars
+├── Jenkinsfile
+├── README.md
+└── .gitignore
 ```
 
----
+## Step-by-Step Guide
 
-## 📙 What I Learned
+### ✅ 1. Set up your GCP environment
+- Create a GCP project (if not already created).
+- Enable required APIs: Compute Engine API, Cloud Resource Manager API.
+- Create a service account with the necessary IAM roles (e.g., Compute Admin, Storage Admin).
+- Download the service account key JSON.
 
-- Automating infrastructure with Terraform
-- Setting up firewall rules, public IPs, and metadata scripts
-- Debugging network/subnet/IP assignment on GCP
-- Practical experience with VM provisioning in a cloud environment
+### ✅ 2. Initialize the Terraform project
+- Define infrastructure in `main.tf`, variables in `variables.tf`, and outputs in `outputs.tf`.
+- Add your credentials and project details in `terraform.tfvars`.
+- Configure `backend.tf` for GCS remote state.
 
----
+### ✅ 3. Validate Terraform manually
+```bash
+terraform init
+terraform plan
+terraform apply
+```
 
-## 🧠 Author
+### ✅ 4. Create a GCS bucket for remote backend
+```bash
+gsutil mb -p YOUR_PROJECT_ID -l REGION gs://terraform-state-YOUR_NAME
+```
+Update `backend.tf` accordingly:
+```hcl
+terraform {
+  backend "gcs" {
+    bucket  = "terraform-state-YOUR_NAME"
+    prefix  = "gcp-terraform-lab/state"
+  }
+}
+```
+Then run:
+```bash
+terraform init -reconfigure
+```
 
-**Haidi Zakaria**  
-Cloud Engineering Enthusiast | Certified AWS ,Azure & IBM cloud
-[LinkedIn Profile](www.linkedin.com/in/haidi-zakaria-bb424152)
-=======
-# GCP Terraform Lab
+### ✅ 5. Install Jenkins (Windows)
+- Install Java 21+.
+- Install Jenkins using the Windows installer.
+- Run Jenkins as a local service.
+- Set up admin user and install suggested plugins.
 
-This project provisions a Google Cloud Compute Engine instance using Terraform.
->>>>>>> d93acc4 (Rebuild GCP Terraform lab)
+### ✅ 6. Configure Jenkins for Terraform
+- Install required plugins: Pipeline, Git, Credentials.
+- Create credentials:
+  - GCP service account key (secret file)
+  - GitHub (username/password or token)
+- Create a new Pipeline job linked to your GitHub repo.
+
+### ✅ 7. Add `Jenkinsfile` to project root
+```groovy
+pipeline {
+    agent any
+
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = credentials('gcp-service-account')
+        TF_IN_AUTOMATION = "true"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/YOUR_USERNAME/gcp-terraform-lab.git'
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                bat 'terraform init'
+            }
+        }
+
+        stage('Terraform Format') {
+            steps {
+                bat 'terraform fmt -check'
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                bat 'terraform validate'
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                bat 'terraform plan -input=false'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                bat 'terraform apply -auto-approve'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '✅ Terraform pipeline completed successfully!'
+        }
+        failure {
+            echo '❌ Build failed. Please check the logs above.'
+        }
+    }
+}
+```
+
+### ✅ 8. Push project to GitHub
+```bash
+cd C:\Users\1\Documents\gcp-terraform-lab
+git init
+git remote add origin https://github.com/YOUR_USERNAME/gcp-terraform-lab.git
+git add .
+git commit -m "Automated GCP infra setup with Terraform and Jenkins CI/CD"
+git push -u origin main --force
+```
+
+### ✅ 9. Trigger Jenkins build
+- Run the pipeline from Jenkins dashboard.
+- Monitor output and validate external IP from Terraform output.
+
+### ✅ 10. Verify the deployment
+- Visit the Apache default page at the VM’s external IP.
+  - Example: `http://34.77.242.16/`
+
+------------------------------------------
