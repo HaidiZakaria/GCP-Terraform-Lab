@@ -3,17 +3,15 @@ provider "google" {
   region  = var.region
   zone    = var.zone
 }
+
 resource "google_compute_network" "vpc" {
   name                    = "terraform-vpc-new" # <- Changed
   auto_create_subnetworks = false
-}
-
 
   lifecycle {
     prevent_destroy = true
   }
 }
-
 
 resource "google_compute_subnetwork" "subnet" {
   name          = "terraform-subnet"
